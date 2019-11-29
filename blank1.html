@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="KeyWords" content="lonelystar,植物大战僵尸,网页版,JS植物大战僵尸,JS版,Javascript">
+<meta name="Description" content="JavaScript版的植物大战僵尸 ">
+<title>植物大战僵尸Javascript版</title> 
+<style type="text/css">
+*{margin:0px;padding:0px;font-family: 宋体; font-size: 12px} 
+.WindowFrame{position:absolute;width:900px;height:600px;overflow: hidden;border:3px outset/*边框突出*/ ;}
+.Menu{float:left;text-align:center;line-height:41px;font-weight:bold;font-family:黑体;color:#00CB08;height:41px;width:113px;background:url(images/interface/Button.png) no-repeat;font-size:14px;}
+</style>
+<script type="text/javascript">
+	/*1、背景图片偏移	*/
+	window.onload=function() {
+		var ground = document.getElementById("tGround");
+		/*（1）获取设置图片元素div，要保存该变量元素object*/
+		ground.style.visibility = "visible";//使内容显示出来
+		ground.style.backgroundImage = "url(images/interface/background1unsodded.jpg)";//设置游戏开始时背景图片
+		var l = 0;//设置默认平移量初始值为0
+		var groundTimer = setInterval(function () {
+		/*（2）分析平移，每隔一段时间左偏移，用setInterval（做什么。每隔多少秒）
+		不断移，产生平移效果*/
+			l = l + 20;
+			ground.style.backgroundPositionX = -l + "px";//-是从左到右
+			if (-l <= -500) {
+				clearInterval(groundTimer);//停止按时间一直做某事（在此是停止偏移）,cleanInterval和setInterval是相对的，开始，停止
+				groundTimer=null;
+				//2、出现僵尸 （1）设置僵尸区域的左偏移
+				var zombie=document.getElementById("dZombie");
+				zombie.style.left=(900-335)+"px";//偏移使得僵尸区域到指定位置，僵尸区域显现
+
+				//（2）生成僵尸，并放入僵尸区域，可以根据html改写
+				for(var i=0;i<5;i++) {
+                    var js = document.createElement("div");//生成一个新盒子，盒子是僵尸位置
+                    js.style.position = "absolute";//html改写成js，js.style...使用
+                    js.style.left = Math.random() * (335 - 166) + "px";
+                    js.style.top = Math.random() * (600 - 144) + "px";
+                    js.style.zIndex = 1;
+                    js.innerHTML = '<img src="images/interface/plantshadow32.png" style="position:absolute;left:72px;top:122px"> '
+                        + '<img style="position:absolute;left:10px;top:0px" src="images/Zombies/1.gif">';
+                    zombie.appendChild(js);//将盒子放入指定区域
+                }
+					//3、回到指定区域铺草
+					setTimeout(function(){ //（1）停留2秒后，回到背景图片起点
+						ground.style.backgroundPositionX="-115px";
+						zombie.style.left="1065px";
+						//（2）铺草
+						var row=document.createElement("div");
+						row.style.position="absolute";
+						row.style.height="117px";
+						row.style.width="0px";
+						row.style.top="280px";
+						row.style.left="132px";
+						row.style.zIndex="1";
+						row.style.backgroundImage="url(images/interface/sod1row.png)";
+						row.style.backgroundPosition="0px 0px"
+						row.style.backgroundRepeat="no-repeat";//对草皮进行初始化
+						ground.appendChild(row);//把草皮加入背景
+
+                        var roll=document.createElement("img");//新建一个img元素
+                        roll.src="images/interface/sodRoll.png";
+                        roll.style.position="absolute";
+                        roll.style.height="141px";
+                        roll.style.width="68px";
+                        roll.style.top="250px";
+                        roll.style.left="132px";
+                        roll.style.zIndex="1";
+                        ground.appendChild(roll);//把草卷加入背景
+
+                        var cap=document.createElement("img");
+                        cap.src="images/interface/SodRollCap.png";
+                        cap.style.position="absolute";
+                        cap.style.height="61px";
+                        cap.style.width="63px";
+                        cap.style.top="365px";
+                        cap.style.left="132px";
+                        cap.style.zIndex="1";
+                        ground.appendChild(cap);//把草轴盖加入背景
+
+						//草的铺开
+						var l=0;//控制草皮宽度
+						var w=0;//控制草卷宽度
+						var sodTimer=setInterval(function(){
+							l=l+25;
+							w=w+1.7;
+							row.style.width=l+"px";
+							roll.style.width=(68-w)+"px";
+							roll.style.left=(132+l)+"px";
+
+							cap.style.height=(71-w)+"px";
+							cap.style.width=(73-w)+"px";
+							cap.style.left=(132+l)+"px";
+							cap.style.top=(345+w/2)+"px";
+							if(row.offsetWidth>=755){
+								cleanInterval(sodTimer);
+							}
+							if(row.offsetWidth>=740){
+								ground.removeChild(roll);
+								ground.removeChild(cap);
+							}
+						},40);
+
+                    },2000);
+				}
+		},40);
+	}
+</script>
+</head>  
+<body id="dBody"   bgcolor="#008080">  
+
+<!--主界面EDAll-->
+<div class="WindowFrame" id="dAll" style="position:absolute;top:0;width:900px;background:#000">
+	<!--背景图片-->
+	<div style="position:absolute;width:1400px;height:600px;visibility:hidden;z-index:0" id="tGround"></div>
+ 	<!--出场僵尸显示-->
+	<div id="dZombie" style="position:absolute;width:335px;height:600px;left:1065px;top:0;z-index:1">
+    	
+    
+    </div> 
+</div> 
+<!--菜单-->
+<div id="dMenu" style="visibility:hidden;position:absolute;cursor:pointer;width:226px;height:41px;left:677px;z-index:254">
+	<div id="dMenu0" class="Menu" onclick="">暂停游戏</div>
+	<div id="dMenu1" class="Menu" onclick="">菜 单</div>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,114 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>植物大战僵尸Javascript版 -- 种植物</title>
+    <style type="text/css">
+        *{margin:0px;padding:0px;font-family: 宋体; font-size: 12px}
+        .WindowFrame{position:absolute;width:900px;height:600px;overflow: hidden;border:3px outset/*边框突出*/ ;}
+        #tGround {position:absolute;width:1400px;height:600px;visibility:visible;z-index:0;background:url('images/interface/background1unsodded.jpg') -115px 0px no-repeat;}
+        #sod{position: absolute; height: 117px; width: 770px; top: 280px; left: 132px; z-index: 1; background-image: url( ./images/interface/sod1row.png); background-position: 0px 0px; background-repeat: no-repeat;}
+        #dTop{position: absolute; left: 105px; top: 0px; height: 35px; width: 123px; visibility: visible; z-index: 1;}
+
+        #dCardList{visibility: visible; position: absolute; left: 3px; width: 100px; overflow: visible; z-index: 254;}
+        #dCardList div {position: relative;cursor: pointer;padding: 0;height: 60px;}
+        #dCardList img {position: absolute;width: 100px;height: 60px;}
+        #dCardoPeashooter{}
+        #dCardList span {cursor: pointer;position: absolute;left: 66px;top: 40px;width: 34px;height: 20px;font-size: 11pt;}
+    </style>
+    <script type="text/javascript">
+        window.onload=function(){//窗体加载事件
+            var all=document.getElementById("dAll");//点击选项卡，选项卡变灰，出现豌豆射手
+            var card=document.getElementById("dCardoPeashooter");
+            card.onclick=function() {//选项卡变灰
+                var imgs = card.getElementsByTagName("img");
+                imgs[1].style.visibility = "hidden";//射手显现
+                var pea = document.createElement("div");
+                pea.style.position = "absolute";
+                pea.style.zIndex = "300";
+                pea.innerHTML = '<img src="images/interface/Peashooter.gif">';
+                all.appendChild(pea);
+
+                var pea_opa=document.createElement("div");//创建元素，下面代码使他实现生成一个阴影
+                pea_opa.innerHTML='<img src="images/interface/Peashooter.gif">';
+                pea_opa.style.position="absolute";
+                pea_opa.style.zIndex="200";
+                pea_opa.style.opacity="0.8";
+                pea_opa.style.filter="alpha(opacity=80)";
+                pea_opa.style.visibility="hidden";//注意默认阴影不可见
+                all.appendChild(pea_opa);
+
+                all.onmousemove = function (event) {//射手跟随鼠标移动
+                    var e = event || window.event;
+                    pea.style.left = (e.clientX - pea.offsetWidth/2) + "px";//设置射手可放置位置的边界
+                    pea.style.top = (e.clientY - pea.offsetHeight/2) + "px";//用草的位置（top）和草的下边距来确定位置
+
+                    var sod = document.getElementById("sod");
+                    if (pea.offsetTop<sod.offsetTop || pea.offsetTop > sod.offsetTop + sod.offsetHeight){
+                    pea_opa.style.visibility = "hidden";//判断是否在可种植区域
+                        pea.onclick = function () {
+                            //无法种植
+                            all.removeChild(pea);
+                            all.removeChild(pea_opa);
+                            //选项卡变回彩色
+                            imgs[1].style.visibility = "visible";
+                        }
+                    }else{
+                        pea_opa.style.visibility="visible";
+                        pea_opa.style.top=(sod.offsetTop+sod.offsetHeight/2-(pea_opa.offsetHeight/2))+"px";
+                        var ow=sod.offsetWidth/9-3;//防止射手的嘴巴突出
+                        if(e.clientX<=sod.offsetLeft+ow) {
+                            pea_opa.style.left=(sod.offsetLeft+ow*(1-1)+(ow/2-pea_opa.offsetWidth/2))+"px";
+                        } else if(e.clientX>sod.offsetLeft+ow*8) {
+                            pea_opa.style.left=(sod.offsetLeft+ow*(9-1)+(ow/2-pea_opa.offsetWidth/2))+"px";
+                        } else{
+                            for(var i=2;i<=8;i++){
+                                if(e.clientX>sod.offsetLeft+ow*(i-1)&&e.clientX<=sod.offsetLeft+ow*i){
+                                    pea_opa.style.left=(sod.offsetLeft+ow*(i-1)+(ow/2-pea_opa.offsetWidth/2))+"px";
+                                }
+                            }
+                        }
+                        pea.onclick=function(){
+                            pea.style.left=pea_opa.offsetLeft+"px";
+                            pea.style.top=pea_opa.offsetTop+"px";
+
+                            all.removeChild(pea_opa);
+                            //注意：要把豌豆跟随鼠标移动的事件致空
+                            all.onmousemove=null;
+                            imgs[1].style.visibility="visible";
+                        }
+                    }
+                    pea.oncontextmenu=function() {
+                        //无法种植
+                        all.removeChild(pea);
+                        all.removeChild(pea_opa);
+                        //选项卡变回彩色
+                        imgs[1].style.visibility = "visible";
+                        //清楚右击菜单的默认样式
+
+                    }
+                }
+            }
+        }
+
+    </script>
+</head>
+<body id="dBody" oncontextmenu="return false"  bgcolor="#008080"><!-- oncontextmenu="return false"清除界面右键菜单-->
+<!--主界面EDAll-->
+<div class="WindowFrame" id="dAll">
+    <!--背景图片-->
+    <div id="tGround"></div>
+    <!--道具选项卡-->
+    <div id="dCardList">
+        <div id="dCardoPeashooter"  >
+            <img src="images/interface/PeashooterG.png" >
+            <img src="images/interface/Peashooter.png" style="visibility:visible;">
+            <span id="sSunNum0">100</span>
+        </div>
+    </div>
+    <!--草地背景-->
+    <div id="sod"></div>
+</div>
+</body>
+</html>

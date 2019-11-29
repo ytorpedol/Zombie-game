@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> 
+<title>植物大战僵尸Javascript版 -- 收集阳光</title> 
+<style type="text/css"> 
+*{margin:0px;padding:0px;font-family: 宋体; font-size: 12px} 
+.WindowFrame{position:absolute;width:900px;height:600px;overflow: hidden;border:3px outset/*边框突出*/ ;}
+#tGround {position:absolute;width:1400px;height:600px;visibility:visible;z-index:0;background:url('images/interface/background1unsodded.jpg') -115px 0px no-repeat;}
+#sod{position: absolute; height: 117px; width: 770px; top: 280px; left: 132px; z-index: 1; background-image: url( ./images/interface/sod1row.png); background-position: 0px 0px; background-repeat: no-repeat;}
+#dTop{position: absolute; left: 105px; top: 0px; height: 35px; width: 123px; visibility: visible; z-index: 1;}
+#dSunNum{background:url('images/interface/SunBack.png') no-repeat;position:absolute;width:123px;height:35px}
+#sSunNum{text-align:center;position:absolute;top:4px;left:43px;width:68px;font-family:Verdana;font-weight:bold;font-size:22px;}
+</style> 
+<script type="text/javascript">
+	window.onload = function () {
+        var flag=true;//true为vip版的，flase为普通玩家版
+        var odall = document.getElementById("dAll");
+
+        setInterval(fn,5000);
+        function fn() {
+            var sun = document.createElement("img");//
+            sun.src = "images/interface/Sun.gif";
+            sun.style.cursor = "pointer";
+            sun.style.position = "absolute";
+            sun.style.zIndex = "25";
+            sun.style.opacity = "0.8";
+            sun.style.height = "78px";
+            sun.style.width = "78px";
+            //sun.style.top = "78px";在下面设置top后不需要
+
+            sun.style.left = Math.random() * (900 - 78) + "px";
+            var down = Math.random() * (600 - 78);//设置停止位置时，用于值的比较不要加单位
+            odall.appendChild(sun);
+
+            var x = 0;//设置太阳偏移值
+            var sunTimer = setInterval(function () {
+                sun.style.top = x + "px";//设置太阳的默认值上边界为0
+                if (sun.offsetTop >= down) {
+                    clearInterval(sunTimer);//停止计时
+                    sunTimer=null;
+                    setTimeout(function () {
+                        if(flag){//判断是什么版本，vip版3秒后收集，普通版3秒后消失
+                            sun.onclick();//调用点击收集函数（不用点击触发）
+                        }
+                        else
+                        {
+                            odall.removeChild(sun);
+                        }
+                    }, 3000);
+                }
+                x = x + 1;//每隔20毫秒移动1个像素
+                sun.onclick = function () {//太阳倾斜移动到收集区域，让太阳停止向下运动
+                    clearInterval(sunTimer);
+                    sunTimer = null;
+                    var a = sun.offsetLeft - 80;//先求a边，再求b，通过勾股定理求c
+                    var b = sun.offsetTop + 20//太阳要运动到的位置（80，-20）
+                    var c = Math.sqrt((a * a) + (b * b));
+                    var speedX = a / c;//x轴移动
+                    var speedY = b / c;//y轴移动
+                    setInterval(function () {//太阳将会在记分牌处停留1秒
+                        sun.style.left = (sun.offsetLeft - speedX * 20) + "px";
+                        sun.style.top = (sun.offsetTop - speedY * 20) + "px";
+                        if (sun.offsetLeft <= 80 || sun.offsetTop <= -20) {//判断是否超出（80，-20），超出将停止倾斜
+                            sun.style.left = 80 + "px";
+                            sun.style.top = -20 + "px";
+                            setTimeout(function () {
+                                odall.removeChild(sun);//消失
+                                var score = document.getElementById("sSunNum");
+                                var num = parseInt(score.innerHTML);//记分牌那里是字符串，要加必须先变成整型
+                                if (num < 9999) {
+                                    num = num + 25;//如不转化为整型，那么+相当于字符串连接
+                                    score.innerHTML = num;
+                                }
+                            }, 1000);
+                        }
+                    }, 20);
+                }
+            }, 20);
+        }
+	}
+</script>
+
+
+</head>  
+<body id="dBody"   bgcolor="#008080">   
+<!--主界面EDAll-->
+<div class="WindowFrame" id="dAll" style="position:absolute;top:0;width:900px;background:#000">
+	<!--背景图片-->
+	<div id="tGround"></div> 
+    <!--草地背景-->
+    <div id="sod"></div>
+    <!--分数牌-->
+    <div id="dTop">
+        <div id="dSunNum"> 
+            <span id="sSunNum">175</span>
+        </div> 
+    </div>  
+</div>  
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> 
+<title>植物大战僵尸Javascript版 -- 植物战僵尸</title> 
+<style type="text/css"> 
+*{margin:0px;padding:0px;font-family: 宋体; font-size: 12px} 
+.WindowFrame{position:absolute;width:900px;height:600px;overflow: hidden;border:3px outset/*边框突出*/ ;}
+#tGround {position:absolute;width:1400px;height:600px;visibility:visible;z-index:0;background:url('images/interface/background1unsodded.jpg') -115px 0px no-repeat;}
+#sod{position: absolute; height: 117px; width: 770px; top: 280px; left: 132px; z-index: 1; background-image: url( ./images/interface/sod1row.png); background-position: 0px 0px; background-repeat: no-repeat;}  
+#dPlants,#dZombies{position:absolute;left:0;top:0;z-index:2}
+#dPlants div{position: absolute; top: 294px; z-index: 9999;}
+#dZombies div{position: absolute; top: 226px; z-index:22;}
+#dPlants img{position: absolute;}
+</style> 
+<script type="text/javascript">
+	window.onload = function(){
+		var dPlants=document.getElementById("dPlants");
+		var dAll=document.getElementById("dAll");
+		var dZombies=document.getElementById("dZombies");
+		function Plant(){
+			this.zw=this.init();
+			this.blood=4;
+		}
+		//植物的初始化
+		Plant.prototype.init=function(){
+			var zw=document.createElement("div");
+			zw.innerHTML='<img src="images/interface/plantshadow32.png" style="left:-12px;top:49px;">' +
+					'<img src="images/plant/Peashooter.gif">';
+			return zw;
+		}
+		Plant.prototype.doPlant=function(top,left){
+			this.zw.style.left=(left||200)+"px";
+			this.zw.style.top=(top||294)+"px";
+
+			dPlants.appendChild(this.zw);
+		}
+
+		//攻击方式
+		Plant.prototype.attackMode=function(){
+			//如何实现发生豌豆子弹
+			var pd=document.createElement("img");
+
+			pd.src='images/plant/PB00.gif';
+			pd.style.position="absolute";
+			pd.style.zIndex='888';
+			pd.style.left=(this.zw.offsetLeft+30)+"px";
+			pd.style.top=(this.zw.offsetTop+3)+"px";
+			dZombies.appendChild(pd);
+			return pd;
+		}
+		//攻击
+		Plant.prototype.attack=function(zombie){
+			var This=this;
+			this.attackTimer=setInterval(function(){
+				var pd=This.attackMode();
+				var pdTimer=setInterval(function(){
+					pd.style.left=(pd.offsetLeft+11)+"px";
+					if(pd.offsetLeft>=dAll.offsetWidth){
+						clearInterval(pdTimer);
+						pdTimer=null;
+
+						dZombies.removeChild(pd);
+					}else if(pd.offsetLeft>=zombie.js.offsetLeft+40){
+						clearInterval(pdTimer);
+						pdTimer=null;
+						//实现爆炸
+						pd.src="images/plant/PeaBulletHit.gif";
+						setTimeout(function(){
+							dZombies.removeChild(pd);
+						},300);
+						zombie.blood--;
+						if(This.zw.left>=zombie.js.offsetLeft+40&&This.blood!=0&&zombie.blood!=0){
+							This.blood--;
+							if(This.blood==0){
+								This.die();
+							}else{
+								if(zombie.blood>2){
+									zombie.eat();
+								}else if(zombie.blood==2){
+									zombie.lossHead();
+								}else if(zombie.blood==1){
+									zombie.noHeadEat();
+								}else if(zombie.blood==0){
+									zombie.die();
+									This.stop();
+								}
+							}
+						}else{
+							if(zombie.blood>2){
+								zombie.walk();
+							}else if(zombie.blood==2){
+								zombie.lossHead();
+								zombie.lossHeadWalk();
+							}else if(zombie.blood==1){
+								zombie.lossHeadWalk();
+							}else if(zombie.blood==0){
+								zombie.die();
+								This.stop();
+							}
+						}
+					}
+				},80);
+			},2000);
+		}
+		Plant.prototype.stop=function(){//停止攻击
+			clearInterval(this.attackTimer);
+			this.attackTimer=null;
+		}
+		Plant.prototype.die=function(){	//死亡
+			this.stop();
+			dPlants.removeChild(this.zw);
+		}
+		function Zombie(){	//定义僵尸
+			this.js=this.init();
+			this.blood=10;
+		}
+		Zombie.prototype.init=function(){	//僵尸初始化
+			var js=document.createElement("div");
+			js.innerHTML='<img src="images/interface/plantshadow32.png" style="position:absolute;left:72px;top:122px;">' +
+					'<img src="images/Zombies/Zombie.gif">';//僵尸的定位
+			js.style.left=700+"px";
+			dZombies.appendChild(js);
+			return js;
+		}
+		Zombie.prototype.walk=function(){//僵尸行走
+			if(this.walkTimer==null) {
+				var This=this;
+				var imgs=this.js.getElementsByTagName("img");
+				imgs[1].src='images/Zombies/Zombie.gif';
+				this.walkTimer = setInterval(function () {
+					This.js.style.left = (This.js.offsetLeft - 1) + "px";
+
+				}, 80);
+			}
+		}
+		Zombie.prototype.lossHeadWalk=function(){//无头僵尸行走
+			//alert(12);
+			var This=this;
+			//原因：用于将僵尸吃该成走
+			var imgs=this.js.getElementsByTagName("img");
+
+			imgs[1].src='images/Zombies/ZombieLostHead.gif';
+			if(this.walkTimer==null) {
+				//僵尸每1秒行走1px
+				this.walkTimer = setInterval(function () {
+					This.js.style.left = (This.js.offsetLeft - 1) + "px";
+				}, 80);
+			}
+		}
+		Zombie.prototype.lossHead=function(){//僵尸掉头
+			var head=document.createElement("img");
+			head.src='images/Zombies/ZombieHead.gif';
+			head.style.position="absolute";
+			head.style.left=(this.js.offsetLeft+38)+"px";
+			head.style.top=this.js.offsetTop+"px";
+			head.style.zIndex="23";
+
+			dZombies.appendChild(head);
+			setTimeout(function(){
+				dZombies.removeChild(head);
+			},800);
+		}
+
+		Zombie.prototype.eat=function(){//僵尸吃
+			//僵尸停止行走
+			clearInterval(this.walkTimer);
+			this.walkTimer=null;
+			var imgs=this.js.getElementsByTagName("img");
+			imgs[1].src='images/Zombies/ZombieAttack.gif';
+		}
+
+		Zombie.prototype.noHeadEat=function(){//无头僵尸吃
+			clearInterval(this.walkTimer);//僵尸停止行走
+			this.walkTimer=null;
+			var imgs=this.js.getElementsByTagName("img");
+			imgs[1].src='images/Zombies/ZombieLostHeadAttack.gif';
+		}
+		Zombie.prototype.die=function(){//僵尸死亡
+			//僵尸停止行走
+			clearInterval(this.walkTimer);
+			this.walkTimer=null;
+			var imgs=this.js.getElementsByTagName("img");
+			imgs[1].src='images/Zombies/ZombieDie.gif';
+			this.clean();
+		}
+		Zombie.prototype.clean=function(){//僵尸消失
+			var This=this;
+			setTimeout(function(){
+				dZombies.removeChild(This.js);
+			},2000);
+		}
+		var zombie=new Zombie();
+		zombie.walk();
+		var plant=new Plant();
+		plant.doPlant();
+		plant.attack(zombie);
+	}
+
+</script> 
+</head>  
+<body id="dBody"   bgcolor="#008080">   
+<!--主界面EDAll-->
+<div class="WindowFrame" id="dAll"> 
+	<div id="tGround"><!--背景图片--></div>   
+    <div id="sod"><!--草地背景--></div>  
+    <div id="dPlants"></div> <!--植物容器-->
+    <div id="dZombies"></div> <!--僵尸容器-->
+</div>  
+</body>
+</html>
